@@ -1,0 +1,25 @@
+:root {
+    --font-fallback: BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+		"Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+		sans-serif;
+    --font-body: Inter, var(--font-fallback);
+	--font-heading: Inter, var(--font-fallback);
+	--font-code: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console,
+		monospace;
+}
+h1{
+  color: aliceblue;
+}
+body{
+    background-color: rgb(39, 53, 56);
+}
+.container{
+    display: flex;
+    justify-content: center;
+    align-items:center;
+    flex-direction: column;
+    height: 100vh;
+}
+input{
+  margin-top: 3rem;
+}
