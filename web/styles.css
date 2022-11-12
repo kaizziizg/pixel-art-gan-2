@@ -24,17 +24,17 @@ h1{
 td{
 	text-align: center;
 }
-table{
+/* table{
 	width: 50%;
-}
+} */
 html{
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	-o-user-select:none;
 	user-select:none;
-	overflow-y: hidden;
+	overflow-y: hidden; 
 	overflow-x: hidden;
-	width: 100%;
+	/* width: 100%; */
 	height: 100vh;
 }
 body {
