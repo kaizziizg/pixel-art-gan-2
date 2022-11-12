@@ -15,27 +15,34 @@
 	</head>
 	<body>
 		<div class="container">
-			<h1>PixelArtGan</h1>
-			<div class="mb-3">
-				
-				<input
-					type="nickname"
-					class="form-control"
-					id="nickname"
-					placeholder="nickname"
-				/>
+			<div class="jumbotron">
+				<h1 class="display-4">PixelArtGAN</h1>
+				<p class="lead">
+					
+				</p>
+				<hr class="my-4" />
 
-				<input
-					type="luckyNumber"
-					class="form-control"
-					id="luckyNumber"
-					placeholder="luckyNumber"
-					oninput = "value=value.replace(/[^\d]/g,'')"
-				/>
+				<div id="form">
+					<input
+						type="nickname"
+						class="form-control"
+						id="nickname"
+						placeholder="Nickname"
+					/>
+
+					<input
+						type="luckyNumber"
+						class="form-control"
+						id="luckyNumber"
+						placeholder="Lucky Number"
+						oninput="value=value.replace(/[^\d]/g,'')"
+					/>
+
+					<button id="btn" type="button" class="btn btn-primary">
+						GOOOOO!
+					</button>
+				</div>
 			</div>
-			<button id="btn" type="button" class="btn btn-primary">
-				GOOOOO!
-			</button>
 		</div>
 
 		<script

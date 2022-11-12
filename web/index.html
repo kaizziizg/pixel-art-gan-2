@@ -18,6 +18,12 @@
 			integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
 			crossorigin="anonymous"
 		/>
+		<script>
+			const params = new URLSearchParams(window.location.search);
+			if (!params.has("name") || !params.has("skin")) {
+				window.location.href='../';
+			}
+		</script>
 	</head>
 	<body>
 		<div class="container">
@@ -26,16 +32,16 @@
 
 			<div
 				id="playcanvas-wrapper"
-				style="width: 480px; height: 320px;margin: auto;"
+				style="margin: auto;"
 			>
 				<script src="start__.js"></script>
 				<script src="loading__.js"></script>
 			</div>
             
-            <table class="table table-dark table-striped table-hover">
+            <table class="table table-dark table-striped table-hover table-bordered border-Secondary">
 				<thead>
                     <tr>
-                        <td colspan="6" scope="col" style="font-size: 2rem;">How To Play?</td>
+                        <td colspan="6" scope="col" style="font-size: 1.5rem;" class="table-active">How To Play?</td>
                     </tr>
                     <tr>
 						<td scope="col" style="font-weight: bold;" colspan="3">Keyboard Controls</td>
@@ -53,19 +59,19 @@
 						<td colspan="3">Jump</td>
 					</tr>
 					<tr>
-                        <td colspan="6" scope="col" style="font-size: 2rem;">Emoji</td>
+                        <td colspan="6" scope="col" style="font-size: 1.5rem;" class="table-active">Emoji</td>
                     </tr>
 					<tr>
-						<td>Z</td>
+						<td >Z</td>
 						<td>sleep</td>
-						<td>X</td>
+						<td >X</td>
 						<td>surprise</td>
-						<td>C</td>
+						<td >C</td>
 						<td>heart</td>
 					</tr>
 					<tr>
 						<td>V</td>
-						<td>...</td>
+						<td >...</td>
 						<td>A</td>
 						<td>angry</td>
 						<td>S</td>

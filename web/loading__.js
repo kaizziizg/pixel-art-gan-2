@@ -3,7 +3,7 @@ pc.script.createLoadingScreen(function (app) {
         // splash wrapper
         var wrapper = document.createElement('div');
         wrapper.id = 'application-splash-wrapper';
-        document.body.appendChild(wrapper);
+        document.querySelector("#playcanvas-wrapper").appendChild(wrapper);
 
         // splash
         var splash = document.createElement('div');
@@ -46,7 +46,7 @@ pc.script.createLoadingScreen(function (app) {
             'body {',
             '    background-color: #283538;',
             '}',
-            '',
+
             '#application-splash-wrapper {',
             '    position: absolute;',
             '    top: 0;',
@@ -55,37 +55,37 @@ pc.script.createLoadingScreen(function (app) {
             '    width: 100%;',
             '    background-color: #283538;',
             '}',
-            '',
+
             '#application-splash {',
             '    position: absolute;',
-            '    top: calc(50% - 28px);',
+            '    top: calc(30% - 28px);',
             '    width: 264px;',
             '    left: calc(50% - 132px);',
             '}',
-            '',
+
             '#application-splash img {',
             '    width: 100%;',
             '}',
-            '',
+
             '#progress-bar-container {',
             '    margin: 20px auto 0 auto;',
             '    height: 2px;',
             '    width: 100%;',
             '    background-color: #1d292c;',
             '}',
-            '',
+
             '#progress-bar {',
             '    width: 0%;',
             '    height: 100%;',
             '    background-color: #f60;',
             '}',
-            '',
             '@media (max-width: 480px) {',
             '    #application-splash {',
             '        width: 170px;',
             '        left: calc(50% - 85px);',
             '    }',
             '}'
+
         ].join('\n');
 
         var style = document.createElement('style');
