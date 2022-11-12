@@ -21,6 +21,7 @@
 		<script>
 			const params = new URLSearchParams(window.location.search);
 			if (!params.has("name") || !params.has("skin")) {
+				alert("no Nickname/skin...");
 				window.location.href='../';
 			}
 		</script>

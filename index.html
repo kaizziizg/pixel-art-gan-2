@@ -17,31 +17,17 @@
 		<div class="container">
 			<div class="jumbotron">
 				<h1 class="display-4">PixelArtGAN</h1>
-				<p class="lead">
-					
-				</p>
+				<p class="lead"></p>
 				<hr class="my-4" />
 
-				<div id="form">
-					<input
-						type="nickname"
-						class="form-control"
-						id="nickname"
-						placeholder="Nickname"
-					/>
+				<form id="form" action="./web/index.html" method="get">
+					<input class="form-control" name="name" required="required" placeholder="Nickname"/>
+					<input class="form-control" name="skin" required="required" placeholder="Lucky Number" oninput="value=value.replace(/[^\d]/g,'')" />
 
-					<input
-						type="luckyNumber"
-						class="form-control"
-						id="luckyNumber"
-						placeholder="Lucky Number"
-						oninput="value=value.replace(/[^\d]/g,'')"
-					/>
-
-					<button id="btn" type="button" class="btn btn-primary">
+					<button id="btn" type="submit" class="btn btn-primary">
 						GOOOOO!
 					</button>
-				</div>
+				</form>
 			</div>
 		</div>
 
@@ -54,6 +40,9 @@
 			let btn = document.querySelector("#btn");
 
 			btn.addEventListener("click", function () {
+				if(document.querySelector("#nickname").value == ""){
+					
+				}
 				location.href =
 					"./web/index.html?name=" +
 					document.querySelector("#nickname").value +
