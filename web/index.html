@@ -24,10 +24,12 @@
 				alert("no Nickname/skin...");
 				window.location.href = "../";
 			}
+
+
 		</script>
 	</head>
 	<body>
-		<div class="container">
+		<div id="container" class="container">
 			<h1>PixelArtGAN</h1>
 
 			<div id="playcanvas-wrapper" style="margin: auto">
@@ -121,5 +123,12 @@
 				</tbody>
 			</table>
 		</div>
+		<script>
+			document.getElementById("container").addEventListener("touchmove", function (e) {
+				e.stopPropagation();
+				e.preventDefault();
+			},false);
+
+		</script>
 	</body>
 </html>
