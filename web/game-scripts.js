@@ -1,1 +1,554 @@
-var Player=pc.createScript("player");Player.attributes.add("skin",{type:"number",default:1}),Player.attributes.add("speed",{type:"number",default:2}),Player.attributes.add("cameraEntity",{type:"entity",default:!1}),Player.attributes.add("rightWall",{type:"number",default:2.2}),Player.attributes.add("leftWall",{type:"number",default:-2.2}),Player.attributes.add("topWall",{type:"number",default:1.39}),Player.attributes.add("bottomWall",{type:"number",default:-1.01}),Player.attributes.add("isGround",{type:"boolean",default:!1}),Player.attributes.add("isJump",{type:"boolean",default:!1}),Player.prototype.initialize=function(){this.touchpos=new pc.Vec3,this.isTouch=!1,this.isTouchJump=!1,this.coords=new pc.Vec3,this.camera=this.app.root.findByName("Camera").camera;var t=this.app.touch;t&&(t.on(pc.EVENT_TOUCHSTART,this.onTouchStart,this),t.on(pc.EVENT_TOUCHEND,this.onTouchEnd,this)),this.on("destroy",(function(){t.off(pc.EVENT_TOUCHSTART,this.onTouchStart,this),t.off(pc.EVENT_TOUCHEND,this.onTouchEnd,this)}),this)},Player.prototype.update=function(t){this.move(t),this.checkjumpGround(t),this.checkBound(t),this.isTouch&&this.touchMove(t)},Player.prototype.touchMove=function(t){this.touchpos.x<0&&this.entity.translate(-this.speed*t,0,0),this.touchpos.x>0&&this.entity.translate(this.speed*t,0,0),this.isTouchJump&&this.isGround&&(this.isJump=!0,this.isGround=!1)},Player.prototype.onTouchStart=function(t){this.isTouch=!0,1===t.touches.length&&this.cameraEntity.camera.screenToWorld(t.touches[0].x,t.touches[0].y,4,this.touchpos),2===t.touches.length&&(this.isTouchJump=!0),t.event.preventDefault()},Player.prototype.onTouchEnd=function(t){this.isTouch=!1,this.isTouchJump=!1,t.event.preventDefault()},Player.prototype.move=function(t){var e=this.app.keyboard.isPressed(pc.KEY_LEFT),i=this.app.keyboard.isPressed(pc.KEY_RIGHT),s=this.app.keyboard.isPressed(pc.KEY_UP),o=this.app.keyboard.isPressed(pc.KEY_DOWN);e&&this.entity.translate(-this.speed*t,0,0),i&&this.entity.translate(this.speed*t,0,0),s&&this.isGround&&(this.isJump=!0,this.isGround=!1),o&&this.entity.translate(0,-this.speed*t,0)},Player.prototype.checkjumpGround=function(t){let e=this.entity.getPosition();this.isJump&&(this.entity.translate(0,this.speed*t*(this.bottomWall-e.y+2.2),0),e.y>-.4&&(this.isJump=!1)),this.isGround||this.isJump||(this.entity.translate(0,-this.speed*t,0),e.y<this.bottomWall+.01&&(this.entity.setPosition(e.x,e.y-this.topWall+2.2,e.z),this.isGround=!0,this.entity.setPosition(e.x,this.bottomWall,e.z)))},Player.prototype.checkBound=function(t){let e=this.entity.getPosition();e.x<this.leftWall&&this.entity.setPosition(this.leftWall+.001,e.y,e.z),e.x>this.rightWall&&this.entity.setPosition(this.rightWall-.001,e.y,e.z),e.y>this.topWall&&this.entity.setPosition(e.x,this.topWall-.001,e.z),e.y<this.bottomWall&&this.entity.setPosition(e.x,this.bottomWall,e.z)};var Network=pc.createScript("network");Network.attributes.add("skin",{type:"number",default:1}),Network.attributes.add("player",{type:"entity"}),Network.attributes.add("emoji",{type:"entity"}),Network.attributes.add("other",{type:"entity"}),Network.attributes.add("name",{type:"string",default:"noName"}),Network.attributes.add("prePos",{type:"vec3"}),Network.id=null,Network.socket=null,Network.name=null;class Character{constructor(e,t,i,s,r){this.id=e,this.name=t,this.x=i,this.y=s,this.z=0,this.entity=r,this.skin=1,this.skinTimeout=null}}Network.prototype.initialize=function(){this.timeout=null;const e=new URLSearchParams(window.location.search);e.has("name")&&(this.name=e.get("name")),this.player.children[0].children[0].element.text=this.name,console.log(this.player.children[0].children[0].element.text),e.has("skin")&&(this.skin=parseInt(e.get("skin"),10)),console.log(this.skin),this.player.sprite.play("Clip "+(this.skin%12+1));const t=new WebSocket("wss://pixel-art-gan-2-d4tkwrdpmq-uc.a.run.app/");Network.socket=t,this.players=new Map,this.prePos=this.player.getPosition(),this.emojiEnable=()=>{this.emoji.enabled=!0},this.emojiDisable=()=>{clearTimeout(this.timeout),this.timeout=setTimeout((()=>{this.emoji.enabled=!1}),1e3)};var i=this;let s={type:"initialize",name:this.name,skin:this.skin};t.addEventListener("open",(function(){t.send(JSON.stringify(s))})),t.addEventListener("message",(({data:e})=>{const t=JSON.parse(e);switch(t.type){case"playerMoved":i.movePlayer(t);break;case"playerJoined":console.log(`${t.player.name} is online!`),i.addPlayer(t);break;case"playerData":i.initializePlayers(t);break;case"killPlayer":i.removePlayer(t);break;case"emoji":i.emojiPlayer(t);break;default:throw new Error(`Unsupported event type: ${t.type}.`)}}))},Network.prototype.update=function(e){this.app.keyboard.wasPressed(pc.KEY_Z)&&this.showEmoji("sleep"),this.app.keyboard.wasPressed(pc.KEY_X)&&this.showEmoji("suprise"),this.app.keyboard.wasPressed(pc.KEY_C)&&this.showEmoji("heart"),this.app.keyboard.wasPressed(pc.KEY_V)&&this.showEmoji("facepalm"),this.app.keyboard.wasPressed(pc.KEY_A)&&this.showEmoji("angry"),this.app.keyboard.wasPressed(pc.KEY_S)&&this.showEmoji("777"),this.prePos.x===this.player.getPosition().x&&this.prePos.y===this.player.getPosition().y||(this.prePos=this.player.getPosition(),this.updatePosition())},Network.prototype.showEmoji=function(e){let t={type:"emoji",emoji:e};Network.socket.send(JSON.stringify(t)),this.emojiEnable(),this.emoji.sprite.play(e),this.emojiDisable()},Network.prototype.updatePosition=function(){if(Network.socket.readyState==WebSocket.OPEN){let e=this.player.getPosition(),t={type:"playerMoved",name:this.name,x:e.x,y:e.y};Network.socket.send(JSON.stringify(t))}},Network.prototype.initializePlayers=function(e){Network.id=e.id;for(let t in e.players)p=new Character(e.players[t].id,e.players[t].name,e.players[t].x,e.players[t].y,this.createPlayerEntity(e.players[t])),this.players.set(e.players[t].id,p)},Network.prototype.addPlayer=function(e){p=new Character(e.player.id,e.player.name,e.player.x,e.player.y,this.createPlayerEntity(e.player)),this.players.set(e.player.id,p)},Network.prototype.createPlayerEntity=function(e){if(e.id!=Network.id){this.other.children[0].children[0].element.text=e.name;let t=this.other.clone();return this.app.root.addChild(t),t.enabled=!0,t.setPosition(e.x,e.y,0),t.sprite.play("Clip "+(e.skin%12+1)),t}},Network.prototype.movePlayer=function(e){e.id!=Network.id&&Network.socket.readyState==WebSocket.OPEN&&this.players.get(e.id).entity.setPosition(e.x,e.y,0)},Network.prototype.emojiPlayer=function(e){if(e.id!=Network.id&&Network.socket.readyState==WebSocket.OPEN){let t=this.players.get(e.id).entity.findByName("emoji");t.enabled=!0,t.sprite.play(e.emoji),clearTimeout(this.players.get(e.id).skinTimeout),this.players.get(e.id).skinTimeout=setTimeout((()=>{t.enabled=!1}),1e3)}},Network.prototype.removePlayer=function(e){this.players.get(e.id).entity&&(this.players.get(e.id).entity.destroy(),this.players.delete(e.id))};pc.script.createLoadingScreen((function(e){var t,a;t=["body {","    background-color: #283538;","}","","#application-splash-wrapper {","    position: absolute;","    top: 0;","    left: 0;","    height: 100%;","    width: 100%;","    background-color: #283538;","}","","#application-splash {","    position: absolute;","    top: calc(50% - 28px);","    width: 264px;","    left: calc(50% - 132px);","}","","#application-splash img {","    width: 100%;","}","","#progress-bar-container {","    margin: 20px auto 0 auto;","    height: 2px;","    width: 100%;","    background-color: #1d292c;","}","","#progress-bar {","    width: 0%;","    height: 100%;","    background-color: #f60;","}","","@media (max-width: 480px) {","    #application-splash {","        width: 170px;","        left: calc(50% - 85px);","    }","}"].join("\n"),(a=document.createElement("style")).type="text/css",a.styleSheet?a.styleSheet.cssText=t:a.appendChild(document.createTextNode(t)),document.head.appendChild(a),function(){var e=document.createElement("div");e.id="application-splash-wrapper",document.body.appendChild(e);var t=document.createElement("div");t.id="application-splash",e.appendChild(t),t.style.display="none";var a=document.createElement("img");a.src="https://res.cloudinary.com/startup-grind/image/upload/dpr_2.0,fl_sanitize/v1/gcs/platform-data-dsc/contentbuilder/logo_dark_horizontal_097s7oa.svg",t.appendChild(a),a.onload=function(){t.style.display="block"};var o=document.createElement("div");o.id="progress-bar-container",t.appendChild(o);var n=document.createElement("div");n.id="progress-bar",o.appendChild(n)}(),e.on("preload:end",(function(){e.off("preload:progress")})),e.on("preload:progress",(function(e){var t=document.getElementById("progress-bar");t&&(e=Math.min(1,Math.max(0,e)),t.style.width=100*e+"%")})),e.on("start",(function(){var e=document.getElementById("application-splash-wrapper");e.parentElement.removeChild(e)}))}));
+// Player.js
+var Player = pc.createScript('player');
+Player.attributes.add('skin', { type: 'number', default: 1 });
+
+Player.attributes.add('speed', { type: 'number', default: 2 });
+Player.attributes.add('cameraEntity', { type: 'entity', default: false });
+
+Player.attributes.add('rightWall', { type: 'number', default: 2.2 });
+Player.attributes.add('leftWall', { type: 'number', default: -2.2 });
+Player.attributes.add('topWall', { type: 'number', default: 1.39 });
+Player.attributes.add('bottomWall', { type: 'number', default: -1.01 });
+Player.attributes.add('isGround', { type: 'boolean', default: false });
+Player.attributes.add('isJump', { type: 'boolean', default: false });
+
+
+
+
+// initialize code called once per entity
+Player.prototype.initialize = function () {
+    this.touchpos = new pc.Vec3();
+    this.touchInit();
+    this.addBtnListenWithOuterHtml();
+    this.coords = new pc.Vec3();
+    this.camera = this.app.root.findByName('Camera').camera;
+
+    var touch = this.app.touch;
+    if (touch) {
+        touch.on(pc.EVENT_TOUCHSTART, this.onTouchStart, this);
+        touch.on(pc.EVENT_TOUCHEND, this.onTouchEnd, this);
+    }
+
+    this.on('destroy', function () {
+        touch.off(pc.EVENT_TOUCHSTART, this.onTouchStart, this);
+        touch.off(pc.EVENT_TOUCHEND, this.onTouchEnd, this);
+    }, this);
+};
+
+Player.prototype.touchInit = function () {
+    this.isTouch = false;
+    this.isTouchJump = false;
+    this.isLeftTouch=false;
+    this.isRightTouch=false;
+    this.isUpTouch=false;
+    this.isZTouch=false;
+    this.isXTouch=false;
+    this.isCTouch=false;
+    this.isVTouch=false;
+    this.isATouch=false;
+    this.isSTouch=false;
+};
+
+// update code called every frame
+Player.prototype.update = function (dt) {
+    this.move(dt);
+    this.checkjumpGround(dt);
+    this.checkBound(dt);
+    if (this.isTouch) {
+        this.touchMove(dt);
+    }
+};
+
+Player.prototype.touchMove = function (dt) {
+
+    if (this.touchpos.x < 0) {
+        this.entity.translate(-this.speed * dt, 0, 0);
+    }
+    if (this.touchpos.x > 0) {
+        this.entity.translate(this.speed * dt, 0, 0);
+    }
+    if (this.isTouchJump && this.isGround) {
+        this.isJump = true;
+        this.isGround = false;
+    }
+
+};
+
+Player.prototype.onTouchStart = function (event) {
+    this.isTouch = true;
+    if (event.touches.length === 1) {
+        this.cameraEntity.camera.screenToWorld(event.touches[0].x, event.touches[0].y, 4, this.touchpos);
+        console.log(this.touchpos.x + "  " + this.touchpos.y);
+    }
+    if (event.touches.length === 2) {
+        this.isTouchJump = true;
+    }
+
+    event.event.preventDefault();
+};
+
+
+Player.prototype.onTouchEnd = function (event) {
+    this.isTouch = false;
+    this.isTouchJump = false;
+    event.event.preventDefault();
+};
+
+
+Player.prototype.move = function (dt) {
+    var left = this.app.keyboard.isPressed(pc.KEY_LEFT);
+    var right = this.app.keyboard.isPressed(pc.KEY_RIGHT);
+    var up = this.app.keyboard.isPressed(pc.KEY_UP);
+    var down = this.app.keyboard.isPressed(pc.KEY_DOWN);
+    if (left || this.isLeftTouch) {
+        this.entity.translate(-this.speed * dt, 0, 0);
+    }
+    if (right || this.isRightTouch) {
+        this.entity.translate(this.speed * dt, 0, 0);
+    }
+    if ((up && this.isGround) || (this.isUpTouch && this.isGround)) {
+        this.isJump = true;
+        this.isGround = false;
+    }
+    if (down) {
+        this.entity.translate(0, -this.speed * dt, 0);
+    }
+};
+
+Player.prototype.checkjumpGround = function (dt) {
+    let p = this.entity.getPosition();
+
+    if (this.isJump) {
+        this.entity.translate(0, this.speed * dt * (this.bottomWall - p.y + 2.2), 0);
+        if (p.y > -0.4) {
+            this.isJump = false;
+        }
+
+    }
+
+    if (!this.isGround && !this.isJump) {
+        this.entity.translate(0, -this.speed * dt, 0);
+        if (p.y < this.bottomWall + 0.01) {
+            this.entity.setPosition(p.x, (p.y - this.topWall + 2.2), p.z);
+            this.isGround = true;
+            this.entity.setPosition(p.x, this.bottomWall, p.z);
+        }
+    }
+};
+
+Player.prototype.checkBound = function (dt) {
+    let p = this.entity.getPosition();
+
+    if (p.x < this.leftWall) {
+        this.entity.setPosition(this.leftWall + 0.001, p.y, p.z);
+    }
+    if (p.x > this.rightWall) {
+        this.entity.setPosition(this.rightWall - 0.001, p.y, p.z);
+    }
+    if (p.y > this.topWall) {
+        this.entity.setPosition(p.x, this.topWall - 0.001, p.z);
+    }
+    if (p.y < this.bottomWall) {
+        this.entity.setPosition(p.x, this.bottomWall, p.z);
+    }
+};
+
+class longBtn {
+	constructor(id, arg,p) {
+		this.event_listener(id);
+		this.arg = arg;
+        this.p = p;
+	}
+
+	mDown = () => {
+        let code = `p.${this.arg} = true`;
+        Function("p",code)(this.p);
+	};
+
+	mUp = () => {
+        let code = `p.${this.arg} = false`;
+        Function("p",code)(this.p);
+	};
+
+	event_listener = (id) => {
+        let btn = document.getElementById(id);
+        if(btn){
+            btn.addEventListener("mousedown", this.mDown);
+            btn.addEventListener("mouseup", this.mUp);
+            btn.addEventListener("touchstart", this.mDown);
+            btn.addEventListener("touchend", this.mUp);
+        }
+	};
+}
+
+
+Player.prototype.addBtnListenWithOuterHtml = function () {
+    
+	this.htmlRightBtn = new longBtn("Right", "isRightTouch",this);
+    this.htmlLeftBtn = new longBtn("Left", "isLeftTouch",this);
+    this.htmlLeftBtn = new longBtn("Up", "isUpTouch",this);
+};
+
+// Network.js
+var Network = pc.createScript('network');
+Network.attributes.add('skin', { type: 'number', default: 1 });
+Network.attributes.add('player', { type: 'entity' });
+Network.attributes.add('emoji', { type: 'entity' });
+Network.attributes.add('other', { type: 'entity' });
+Network.attributes.add('name', { type: 'string', default: "noName" });
+// Network.attributes.add('players', { type:'object' });
+Network.attributes.add('prePos', { type: 'vec3' });
+// static variables
+Network.id = null;
+Network.socket = null;
+Network.name = null;
+
+class Character {
+    constructor(id, name, x, y, entity) {
+        this.id = id;
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.z = 0;
+        this.entity = entity;
+        this.skin = 1;
+        this.skinTimeout = null;
+    }
+}
+
+// initia   lize code called once per entity
+Network.prototype.initialize = function () {
+    this.timeout = null;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("name")) {
+        this.name = params.get("name");
+    }
+    this.player.children[0].children[0].element.text = this.name;
+    this.addBtnListenWithOuterHtml();
+    if (params.has("skin")) {
+        this.skin = parseInt(params.get("skin"), 10);
+    }
+    console.log(this.skin);
+    this.player.sprite.play("Clip " + (this.skin % 12 + 1));
+    const socket = new WebSocket("wss://pixel-art-gan-2-d4tkwrdpmq-uc.a.run.app/");
+    Network.socket = socket;
+    this.players = new Map();
+    this.prePos = this.player.getPosition();
+    
+    this.emojiEnable = () => {
+        this.emoji.enabled = true;
+    };
+    this.emojiDisable = () => {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => { this.emoji.enabled = false; }, 1000);
+    };
+    var self = this;
+
+    let event = {
+        "type": "initialize",
+        "name": this.name,
+        "skin": this.skin
+    };
+    socket.addEventListener('open', function () {
+        socket.send(JSON.stringify(event));
+    });
+
+
+    socket.addEventListener("message", ({ data }) => {
+        const event = JSON.parse(data);
+
+        switch (event.type) {
+            case "playerMoved":
+                self.movePlayer(event);
+                break;
+            case "playerJoined":
+                console.log(`${event.player.name} is online!`);
+                self.addPlayer(event);
+                break;
+            case "playerData":
+                self.initializePlayers(event);
+                break;
+            case "killPlayer":
+                self.removePlayer(event);
+                break;
+            case "emoji":
+                self.emojiPlayer(event);
+                break;
+            default:
+                throw new Error(`Unsupported event type: ${event.type}.`);
+        }
+    });
+};
+
+
+// update code called every frame
+Network.prototype.update = function (dt) {
+    if (this.app.keyboard.wasPressed(pc.KEY_Z) || this.isZTouch) {
+        this.showEmoji("sleep");
+    }
+    if (this.app.keyboard.wasPressed(pc.KEY_X) || this.isXTouch) {
+        this.showEmoji("suprise");
+    }
+    if (this.app.keyboard.wasPressed(pc.KEY_C) || this.isCTouch) {
+        this.showEmoji("heart");
+    }
+    if (this.app.keyboard.wasPressed(pc.KEY_V) || this.isVTouch) {
+        this.showEmoji("facepalm");
+    }
+    if (this.app.keyboard.wasPressed(pc.KEY_A) || this.isATouch) {
+        this.showEmoji("angry");
+    }
+    if (this.app.keyboard.wasPressed(pc.KEY_S) || this.isSTouch) {
+        this.showEmoji("777");
+    }
+
+
+    if (this.prePos.x !== this.player.getPosition().x || this.prePos.y !== this.player.getPosition().y) {
+        this.prePos = this.player.getPosition();
+        this.updatePosition();
+    }
+
+};
+// FIXME : clearTimeout
+Network.prototype.showEmoji = function (emo) {
+    let event = {
+        "type": "emoji",
+        "emoji": emo,
+    };
+    Network.socket.send(JSON.stringify(event));
+    
+    this.emojiEnable();
+    this.emoji.sprite.play(emo);
+    this.emojiDisable();
+};
+
+
+
+Network.prototype.updatePosition = function () {
+    if (Network.socket.readyState == WebSocket.OPEN) {
+        let pos = this.player.getPosition();
+        let event = {
+            "type": "playerMoved",
+            "name": this.name,
+            "x": pos.x,
+            "y": pos.y
+        };
+        Network.socket.send(JSON.stringify(event));
+    }
+
+};
+
+
+Network.prototype.initializePlayers = function (data) {
+    Network.id = data.id;
+
+    for (let i in data.players) {
+        p = new Character(data.players[i].id, data.players[i].name, data.players[i].x, data.players[i].y, this.createPlayerEntity(data.players[i]));
+        this.players.set(data.players[i].id, p);
+    }
+
+};
+
+
+Network.prototype.addPlayer = function (data) {
+    p = new Character(data.player.id, data.player.name, data.player.x, data.player.y, this.createPlayerEntity(data.player));
+    this.players.set(data.player.id, p);
+};
+
+Network.prototype.createPlayerEntity = function (data) {
+    //console.log(data);
+    if (data.id != Network.id) {
+        this.other.children[0].children[0].element.text = data.name;
+        let newPlayer = this.other.clone();
+        this.app.root.addChild(newPlayer);
+        newPlayer.enabled = true;
+        newPlayer.setPosition(data.x, data.y, 0);
+        newPlayer.sprite.play("Clip " + (data.skin % 12 + 1));
+
+        return newPlayer;
+    }
+};
+
+
+Network.prototype.movePlayer = function (data) {
+    // console.log(data.name);
+    if (data.id != Network.id && Network.socket.readyState == WebSocket.OPEN) {
+        this.players.get(data.id).entity.setPosition(data.x, data.y, 0);
+    }
+};
+
+Network.prototype.emojiPlayer = function (data) {
+    if (data.id != Network.id && Network.socket.readyState == WebSocket.OPEN) {
+        let playerEmoji =this.players.get(data.id).entity.findByName("emoji");
+        
+        playerEmoji.enabled = true;
+        playerEmoji.sprite.play(data.emoji);
+        clearTimeout(this.players.get(data.id).skinTimeout);
+        this.players.get(data.id).skinTimeout = setTimeout(() => { playerEmoji.enabled = false; }, 1000);
+    }
+};
+
+Network.prototype.removePlayer = function (data) {
+    if (this.players.get(data.id).entity) {
+        this.players.get(data.id).entity.destroy();
+        this.players.delete(data.id);
+    }
+};
+
+Network.prototype.touchInit = function () {
+    this.isZTouch=false;
+    this.isXTouch=false;
+    this.isCTouch=false;
+    this.isVTouch=false;
+    this.isATouch=false;
+    this.isSTouch=false;
+};
+
+// class longBtn {
+// 	constructor(id, arg,p) {
+// 		this.event_listener(id);
+// 		this.arg = arg;
+//         this.p = p;
+// 	}
+
+// 	mDown = () => {
+//         let code = `p.${this.arg} = true`;
+//         Function("p",code)(this.p);
+// 	};
+
+// 	mUp = () => {
+//         let code = `p.${this.arg} = false`;
+//         Function("p",code)(this.p);
+// 	};
+
+// 	event_listener = (id) => {
+//         let btn = document.getElementById(id);
+//         if(btn){
+//             btn.addEventListener("mousedown", this.mDown);
+//             btn.addEventListener("mouseup", this.mUp);
+//         }
+// 	};
+// }
+
+
+Network.prototype.addBtnListenWithOuterHtml = function () {
+	this.htmlRightBtn = new longBtn("Z", "isZTouch",this);
+    this.htmlRightBtn = new longBtn("X", "isXTouch",this);
+    this.htmlRightBtn = new longBtn("C", "isCTouch",this);
+    this.htmlRightBtn = new longBtn("V", "isVTouch",this);
+    this.htmlRightBtn = new longBtn("A", "isATouch",this);
+    this.htmlRightBtn = new longBtn("S", "isSTouch",this);
+};
+
+// loading.js
+pc.script.createLoadingScreen(function (app) {
+    var showSplash = function () {
+        // splash wrapper
+        var wrapper = document.createElement('div');
+        wrapper.id = 'application-splash-wrapper';
+        document.body.appendChild(wrapper);
+
+        // splash
+        var splash = document.createElement('div');
+        splash.id = 'application-splash';
+        wrapper.appendChild(splash);
+        splash.style.display = 'none';
+
+        var logo = document.createElement('img');
+        logo.src = 'https://res.cloudinary.com/startup-grind/image/upload/dpr_2.0,fl_sanitize/v1/gcs/platform-data-dsc/contentbuilder/logo_dark_horizontal_097s7oa.svg';
+        splash.appendChild(logo);
+        logo.onload = function () {
+            splash.style.display = 'block';
+        };
+
+        var container = document.createElement('div');
+        container.id = 'progress-bar-container';
+        splash.appendChild(container);
+
+        var bar = document.createElement('div');
+        bar.id = 'progress-bar';
+        container.appendChild(bar);
+
+    };
+
+    var hideSplash = function () {
+        var splash = document.getElementById('application-splash-wrapper');
+        splash.parentElement.removeChild(splash);
+    };
+
+    var setProgress = function (value) {
+        var bar = document.getElementById('progress-bar');
+        if(bar) {
+            value = Math.min(1, Math.max(0, value));
+            bar.style.width = value * 100 + '%';
+        }
+    };
+
+    var createCss = function () {
+        var css = [
+            'body {',
+            '    background-color: #283538;',
+            '}',
+            '',
+            '#application-splash-wrapper {',
+            '    position: absolute;',
+            '    top: 0;',
+            '    left: 0;',
+            '    height: 100%;',
+            '    width: 100%;',
+            '    background-color: #283538;',
+            '}',
+            '',
+            '#application-splash {',
+            '    position: absolute;',
+            '    top: calc(50% - 28px);',
+            '    width: 264px;',
+            '    left: calc(50% - 132px);',
+            '}',
+            '',
+            '#application-splash img {',
+            '    width: 100%;',
+            '}',
+            '',
+            '#progress-bar-container {',
+            '    margin: 20px auto 0 auto;',
+            '    height: 2px;',
+            '    width: 100%;',
+            '    background-color: #1d292c;',
+            '}',
+            '',
+            '#progress-bar {',
+            '    width: 0%;',
+            '    height: 100%;',
+            '    background-color: #f60;',
+            '}',
+            '',
+            '@media (max-width: 480px) {',
+            '    #application-splash {',
+            '        width: 170px;',
+            '        left: calc(50% - 85px);',
+            '    }',
+            '}'
+        ].join('\n');
+
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        if (style.styleSheet) {
+            style.styleSheet.cssText = css;
+        } else {
+            style.appendChild(document.createTextNode(css));
+        }
+
+        document.head.appendChild(style);
+    };
+
+    createCss();
+    showSplash();
+
+    app.on('preload:end', function () {
+        app.off('preload:progress');
+    });
+    app.on('preload:progress', setProgress);
+    app.on('start', hideSplash);
+});
+

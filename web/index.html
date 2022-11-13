@@ -12,7 +12,7 @@
 		<title>PixelArtGan</title>
 		<script src="playcanvas-stable.min.js"></script>
 		<script src="settings__.js"></script>
-        <link
+		<link
 			href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
 			rel="stylesheet"
 			integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
@@ -22,66 +22,104 @@
 			const params = new URLSearchParams(window.location.search);
 			if (!params.has("name") || !params.has("skin")) {
 				alert("no Nickname/skin...");
-				window.location.href='../';
+				window.location.href = "../";
 			}
 		</script>
 	</head>
 	<body>
 		<div class="container">
-            
-				<h1>PixelArtGAN</h1>
+			<h1>PixelArtGAN</h1>
 
-			<div
-				id="playcanvas-wrapper"
-				style="margin: auto;"
-			>
+			<div id="playcanvas-wrapper" style="margin: auto">
 				<script src="start__.js"></script>
 				<script src="loading__.js"></script>
 			</div>
-            
-            <table class="table table-dark table-striped table-hover table-bordered border-Secondary">
+
+			<table
+				class="table table-dark table-striped table-hover table-bordered border-Secondary"
+			>
 				<thead>
-                    <tr>
-                        <td colspan="6" scope="col" style="font-size: 1.5rem;" class="table-active">How To Play?</td>
-                    </tr>
-                    <tr>
-						<td scope="col" style="font-weight: bold;" colspan="3">Keyboard Controls</td>
-						<td scope="col" style="font-weight: bold;" colspan="3">Description</td>
-					</tr>
-                </thead>
-				<tbody>
-					
 					<tr>
-						<td colspan="3">Right/Left Arrow</td>
+						<td
+							colspan="6"
+							scope="col"
+							style="font-size: 1.5rem"
+							class="table-active"
+						>
+							How To Play?
+						</td>
+					</tr>
+					<tr>
+						<td scope="col" style="font-weight: bold" colspan="3">
+							Keyboard Controls
+						</td>
+						<td scope="col" style="font-weight: bold" colspan="3">
+							Description
+						</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan="3">
+							<button id="Up" class="btn btn-secondary">
+								Up
+							</button>
+						</td>
+						<td colspan="3">Jump</td>
+						
+					</tr>
+					<tr>
+						<td colspan="3">
+							<button id="Left" class="btn btn-secondary">
+								Left
+							</button>
+							<button id="Right" class="btn btn-secondary">
+								Right
+							</button>
+						</td>
+
 						<td colspan="3">Move</td>
 					</tr>
 					<tr>
-						<td colspan="3">Up Arrow</td>
-						<td colspan="3">Jump</td>
+						<td
+							colspan="6"
+							scope="col"
+							style="font-size: 1.5rem"
+							class="table-active"
+						>
+							Emoji
+						</td>
 					</tr>
 					<tr>
-                        <td colspan="6" scope="col" style="font-size: 1.5rem;" class="table-active">Emoji</td>
-                    </tr>
-					<tr>
-						<td >Z</td>
+						<td>
+							<button id="Z" class="btn btn-secondary">Z</button>
+						</td>
 						<td>sleep</td>
-						<td >X</td>
+						<td>
+							<button id="X" class="btn btn-secondary">X</button>
+						</td>
 						<td>surprise</td>
-						<td >C</td>
+						<td>
+							<button id="C" class="btn btn-secondary">C</button>
+						</td>
 						<td>heart</td>
 					</tr>
 					<tr>
-						<td>V</td>
-						<td >...</td>
-						<td>A</td>
+						<td>
+							<button id="V" class="btn btn-secondary">V</button>
+						</td>
+						<td>...</td>
+						<td>
+							<button id="A" class="btn btn-secondary">A</button>
+						</td>
 						<td>angry</td>
-						<td>S</td>
+						<td>
+							<button id="S" class="btn btn-secondary">S</button>
+						</td>
 						<td>777</td>
 					</tr>
 				</tbody>
-
 			</table>
-			
 		</div>
 	</body>
 </html>
