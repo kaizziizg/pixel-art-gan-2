@@ -1,9 +1,7 @@
 from google.cloud import aiplatform
 import numpy as np
-import matplotlib.pyplot as plt
 import time
 import numpy as np
-from PIL import Image
 import cv2
 import imageio
 

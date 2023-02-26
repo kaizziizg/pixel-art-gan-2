@@ -1,3 +1,4 @@
 *.ipynb
 *.pyc
-/VertexAI/predict
+/VertexAI/predict/gif/.*
+/VertexAI/predict/spriteSheet/.*
