@@ -3,3 +3,4 @@ imageio==2.25.1
 numpy==1.23.4
 opencv_contrib_python==4.6.0.66
 protobuf==4.22.0
+google-cloud-aiplatform==1.22.0
