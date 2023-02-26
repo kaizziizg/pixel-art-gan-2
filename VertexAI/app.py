@@ -11,6 +11,12 @@ def getPredict():
     img = open(img_file, 'rb').read()
     return send_file(img_file, mimetype='image/png')
 
+@app.route('/getPredictGif')
+def getPredictGif():
+    img_file = vertexAI.getPredictGif()
+    
+    return send_file(img_file, mimetype='image/gif')
+
 if __name__ == '__main__':
-    # app.debug = True
+    app.debug = True
     app.run(host="0.0.0.0", port=3000)
