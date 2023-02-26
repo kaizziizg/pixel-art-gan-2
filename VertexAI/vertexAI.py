@@ -4,6 +4,8 @@ import time
 import numpy as np
 import cv2
 import imageio
+from google.auth import compute_engine
+credentials = compute_engine.Credentials()
 
 ProjectID = "944213700205"
 endpointID = "1442264586525868032"
